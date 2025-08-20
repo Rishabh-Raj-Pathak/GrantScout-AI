@@ -115,138 +115,188 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Find Your Perfect Grant
-        </h2>
-
-        {/* Mode Toggle */}
-        <div className="flex space-x-4 mb-6">
+      {/* Mode Toggle - matching reference design */}
+      <div className="mb-8">
+        <div className="flex bg-gray-100 rounded-lg p-1 max-w-md mx-auto">
           <button
             type="button"
             onClick={() => setFormData((prev) => ({ ...prev, mode: "form" }))}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center px-6 py-3 rounded-md font-medium transition-colors ${
               formData.mode === "form"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            📝 Form Mode
+            📝 Guided Form
           </button>
           <button
             type="button"
             onClick={() => setFormData((prev) => ({ ...prev, mode: "chat" }))}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center px-6 py-3 rounded-md font-medium transition-colors ${
               formData.mode === "chat"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            💬 Chat Mode
+            ✨ Natural Language
           </button>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         {formData.mode === "form" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Country */}
-            <div>
-              <label
-                htmlFor="country"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Country/Region *
+          <div>
+            {/* Description */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Describe what you're looking for
               </label>
-              <select
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="">Select a country</option>
-                {countries.map((country) => (
-                  <option key={country} value={country}>
+              <input
+                type="text"
+                placeholder="Try: 'EU health grants for early-stage startups' or 'Climate grants closing this month'"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+              />
+            </div>
+
+            {/* Countries Section */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Countries
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "India",
+                  "United States",
+                  "European Union",
+                  "United Kingdom",
+                  "Canada",
+                  "Singapore",
+                  "Australia",
+                ].map((country) => (
+                  <button
+                    key={country}
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, country }))
+                    }
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      formData.country === country
+                        ? "bg-gray-900 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
+                    }`}
+                  >
                     {country}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* Sector */}
-            <div>
-              <label
-                htmlFor="sector"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Sector *
-              </label>
-              <select
-                id="sector"
-                name="sector"
-                value={formData.sector}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="">Select a sector</option>
-                {sectors.map((sector) => (
-                  <option key={sector} value={sector}>
+            {/* Sectors Section */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Sectors
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "AI",
+                  "Health",
+                  "Climate",
+                  "Education",
+                  "Cybersecurity",
+                  "Creative",
+                ].map((sector) => (
+                  <button
+                    key={sector}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, sector }))}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      formData.sector === sector
+                        ? "bg-gray-900 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
+                    }`}
+                  >
                     {sector}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* Stage */}
-            <div>
-              <label
-                htmlFor="stage"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Company Stage *
-              </label>
-              <select
-                id="stage"
-                name="stage"
-                value={formData.stage}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                <option value="">Select stage</option>
-                {stages.map((stage) => (
-                  <option key={stage} value={stage}>
-                    {stage}
-                  </option>
-                ))}
-              </select>
+            {/* Founder Criteria Section */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Founder Criteria
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {["Women-led", "LGBTQ+", "Student-led", "Nonprofit"].map(
+                  (criteria) => (
+                    <button
+                      key={criteria}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          founderType:
+                            prev.founderType === criteria ? "" : criteria,
+                        }))
+                      }
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        formData.founderType === criteria
+                          ? "bg-gray-900 text-white shadow-sm"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
+                      }`}
+                    >
+                      {criteria}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
 
-            {/* Founder Type */}
-            <div>
-              <label
-                htmlFor="founderType"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Founder Profile
-              </label>
-              <select
-                id="founderType"
-                name="founderType"
-                value={formData.founderType}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select founder type (optional)</option>
-                {founderTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+            {/* Stage and Date Window */}
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Stage
+                </h3>
+                <select
+                  name="stage"
+                  value={formData.stage}
+                  onChange={handleInputChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select stage</option>
+                  <option value="Seed">Seed</option>
+                  <option value="Pre-Seed">Pre-Seed</option>
+                  <option value="Early Revenue">Early Revenue</option>
+                  <option value="Growth Stage">Growth Stage</option>
+                </select>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Date Window
+                </h3>
+                <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="Active now">Active now</option>
+                  <option value="Closing soon">Closing soon</option>
+                  <option value="Opening soon">Opening soon</option>
+                </select>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Foreign-eligible only?
+                </h3>
+                <div className="flex items-center">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span className="ml-3 text-sm font-medium text-gray-900">
+                      No
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
@@ -270,11 +320,18 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex space-x-4 mt-8">
+        <div className="flex justify-center gap-4 mt-8">
+          <button
+            type="button"
+            onClick={handleResetClick}
+            className="bg-gray-100 text-gray-800 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors border border-gray-300 shadow-sm"
+          >
+            🗑️ Reset
+          </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-gray-900 text-white py-3 px-8 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px] shadow-sm border border-gray-900"
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -282,16 +339,8 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
                 Searching...
               </span>
             ) : (
-              "🔍 Find Grants"
+              "🔍 Run Search"
             )}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleResetClick}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            🔄 Reset
           </button>
         </div>
       </form>

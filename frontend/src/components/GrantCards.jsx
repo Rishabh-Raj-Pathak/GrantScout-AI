@@ -19,15 +19,27 @@ const GrantCard = ({ grant }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-xl font-semibold text-gray-800">{grant.title}</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      {/* Header with badge and save button */}
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+            {grant.country === "USA"
+              ? "US NSF • SBIR Phase I"
+              : grant.country === "Canada"
+              ? "Startup India • SISFS Seed Fund"
+              : "UNICEF • Venture Fund"}
+          </span>
+          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+            {grant.country}
+          </span>
+        </div>
         <button
           onClick={handleSave}
-          className={`p-2 rounded-full transition-colors ${
+          className={`p-1 rounded transition-colors ${
             saved
-              ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100"
-              : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
+              ? "text-yellow-500 hover:text-yellow-600"
+              : "text-gray-400 hover:text-yellow-500"
           }`}
           title={saved ? "Remove from saved" : "Save grant"}
         >
@@ -35,48 +47,71 @@ const GrantCard = ({ grant }) => {
         </button>
       </div>
 
-      <div className="space-y-3 mb-4">
+      {/* Title */}
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        {grant.title}
+      </h3>
+
+      {/* Tags */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+          {grant.country}
+        </span>
+        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+          {grant.sector}
+        </span>
+        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+          Robotics
+        </span>
+        <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
+          Foreign: No
+        </span>
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+          Non-dilutive
+        </span>
+      </div>
+
+      {/* Amount and deadline */}
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <span className="text-2xl font-bold text-green-600">
-            {grant.amount}
-          </span>
-          <span className="text-sm text-gray-500">funding available</span>
+          <span className="text-lg font-semibold text-gray-900">💰</span>
+          <div>
+            <div className="text-lg font-semibold text-gray-900">
+              {grant.amount}
+            </div>
+            <div className="text-sm text-gray-500">funding available</div>
+          </div>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            📍 {grant.country}
-          </span>
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-            🏭 {grant.sector}
-          </span>
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-            ⏰ Deadline: {grant.deadline}
-          </span>
-        </div>
-
-        <div className="text-sm text-gray-600">
-          <p>
-            <strong>Eligibility:</strong> {grant.eligibility}
-          </p>
-          <p>
-            <strong>Source:</strong> {grant.source}
-          </p>
+        <div className="text-right">
+          <div className="text-sm text-gray-500">⏰ Rolling</div>
+          <div className="text-sm font-medium text-gray-900">
+            {grant.deadline}
+          </div>
         </div>
       </div>
 
+      {/* Description */}
+      <div className="text-sm text-gray-600 mb-4">
+        <p>
+          <strong>Eligibility:</strong> {grant.eligibility}
+        </p>
+        <p>
+          <strong>Source:</strong> {grant.source}
+        </p>
+      </div>
+
+      {/* Action buttons */}
       <div className="flex space-x-3">
         <a
           href={grant.apply_link}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
         >
           📝 Apply Now
         </a>
-
         <button
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
           title="Why this grant was recommended"
         >
           ℹ️ Why?
@@ -193,7 +228,7 @@ const GrantCards = ({ grants, filters }) => {
       </div>
 
       {/* Grant Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {grants.map((grant) => (
           <GrantCard key={grant.id} grant={grant} />
         ))}
