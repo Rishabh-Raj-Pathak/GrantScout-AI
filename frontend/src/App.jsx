@@ -248,7 +248,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Navigation */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -260,38 +260,41 @@ function App() {
               </button>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <button
                 onClick={() => setCurrentView("search")}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
                   currentView === "search"
                     ? "bg-gray-900 text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                🔍 Search
+                <span className="sm:hidden">🔍</span>
+                <span className="hidden sm:inline">🔍 Search</span>
               </button>
 
               <button
                 onClick={() => setCurrentView("email")}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
                   currentView === "email"
                     ? "bg-gray-900 text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                📧 Email Digest
+                <span className="sm:hidden">📧</span>
+                <span className="hidden sm:inline">📧 Email Digest</span>
               </button>
 
               <button
                 onClick={() => setCurrentView("history")}
-                className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
                   currentView === "history"
                     ? "bg-gray-900 text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                🕒 History
+                <span className="sm:hidden">🕒</span>
+                <span className="hidden sm:inline">🕒 History</span>
               </button>
             </div>
           </div>
@@ -301,7 +304,7 @@ function App() {
       <div className="flex">
         {/* Agent Progress Sidebar */}
         {(agentProgress.isActive || loading) && (
-          <div className="w-80 bg-white shadow-lg border-r border-gray-200 min-h-screen">
+          <div className="hidden lg:block w-80 bg-white shadow-lg border-r border-gray-200 min-h-screen">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -369,14 +372,45 @@ function App() {
 
         {/* Main Content Area */}
         <div className="flex-1">
+          {/* Mobile Progress Indicator */}
+          {(agentProgress.isActive || loading) && (
+            <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 p-4">
+              <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Agent Progress
+                  </h3>
+                  <span className="text-xs text-gray-500">
+                    {agentProgress.currentStep + 1}/{agentProgress.steps.length}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${
+                        ((agentProgress.currentStep + 1) /
+                          agentProgress.steps.length) *
+                        100
+                      }%`,
+                    }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  {agentProgress.steps[agentProgress.currentStep]}
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="max-w-6xl mx-auto px-4 py-8">
             {currentView === "search" && (
               <>
                 <div className="text-center mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                     Find Global Startup Grants
                   </h1>
-                  <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                  <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
                     Discover funding opportunities tailored to your startup
                     using AI-powered search. Get personalized grant
                     recommendations based on your profile and goals.
@@ -410,7 +444,7 @@ function App() {
 
                 {grants.length > 0 && (
                   <div className="mt-8">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
                       Found {grants.length} Grant
                       {grants.length !== 1 ? "s" : ""}
                     </h2>

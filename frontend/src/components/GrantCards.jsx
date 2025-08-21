@@ -2,10 +2,17 @@ import { useState, useEffect } from "react";
 
 const GrantCard = ({ grant }) => {
   const [saved, setSaved] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  // Load saved state from localStorage
+  useEffect(() => {
+    const savedGrants = JSON.parse(localStorage.getItem("savedGrants") || "[]");
+    const isCurrentGrantSaved = savedGrants.some((g) => g.id === grant.id);
+    setSaved(isCurrentGrantSaved);
+  }, [grant.id]);
 
   const handleSave = () => {
     setSaved(!saved);
-    // TODO: Implement localStorage saving logic
     const savedGrants = JSON.parse(localStorage.getItem("savedGrants") || "[]");
     if (saved) {
       // Remove from saved
@@ -18,8 +25,17 @@ const GrantCard = ({ grant }) => {
     }
   };
 
+  const getWhyGrantText = () => {
+    return `This grant matches your criteria because:
+    • Located in ${grant.country} (matches your location preference)
+    • Focused on ${grant.sector} sector (matches your industry)
+    • Funding amount: ${grant.amount} (suitable for your stage)
+    • Deadline: ${grant.deadline} (gives you time to apply)
+    • Eligibility: ${grant.eligibility}`;
+  };
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200 transform hover:-translate-y-1">
       {/* Header with badge and save button */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-2">
@@ -36,10 +52,10 @@ const GrantCard = ({ grant }) => {
         </div>
         <button
           onClick={handleSave}
-          className={`p-1 rounded transition-colors ${
+          className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 ${
             saved
-              ? "text-yellow-500 hover:text-yellow-600"
-              : "text-gray-400 hover:text-yellow-500"
+              ? "text-yellow-500 hover:text-yellow-600 bg-yellow-50"
+              : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
           }`}
           title={saved ? "Remove from saved" : "Save grant"}
         >
@@ -101,21 +117,31 @@ const GrantCard = ({ grant }) => {
       </div>
 
       {/* Action buttons */}
-      <div className="flex space-x-3">
+      <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
         <a
           href={grant.apply_link}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+          className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 text-sm"
         >
           📝 Apply Now
         </a>
-        <button
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm"
-          title="Why this grant was recommended"
-        >
-          ℹ️ Why?
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowTooltip(!showTooltip)}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition-all duration-200 text-sm"
+            title="Why this grant was recommended"
+          >
+            ℹ️ Why?
+          </button>
+
+          {showTooltip && (
+            <div className="absolute bottom-full left-0 mb-2 w-72 sm:w-80 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg z-10 max-w-screen-sm">
+              <div className="whitespace-pre-line">{getWhyGrantText()}</div>
+              <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -230,7 +256,7 @@ const GrantCards = ({ grants, filters }) => {
           </div>
           <button
             onClick={() => setShowEmailForm(!showEmailForm)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105"
           >
             {showEmailForm ? "Cancel" : "Send Digest"}
           </button>
@@ -238,7 +264,7 @@ const GrantCards = ({ grants, filters }) => {
 
         {showEmailForm && (
           <form onSubmit={handleSendEmail} className="mt-4 space-y-3">
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <input
                 type="email"
                 value={email}
@@ -250,7 +276,7 @@ const GrantCards = ({ grants, filters }) => {
               <button
                 type="submit"
                 disabled={sendingEmail}
-                className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {sendingEmail ? (
                   <span className="flex items-center">
@@ -277,7 +303,7 @@ const GrantCards = ({ grants, filters }) => {
       </div>
 
       {/* Grant Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {grants.map((grant) => (
           <GrantCard key={grant.id} grant={grant} />
         ))}
