@@ -3,6 +3,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 from email_service import EmailService
+from grant_agent import GrantAgent
 
 # Load environment variables from root directory
 load_dotenv('../.env')
@@ -10,8 +11,9 @@ load_dotenv('../.env')
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Initialize email service
+# Initialize services
 email_service = EmailService()
+grant_agent = GrantAgent()
 
 @app.route('/', methods=['GET'])
 def home():
@@ -23,47 +25,24 @@ def home():
 
 @app.route('/process-input', methods=['POST'])
 def process_input():
-    """Process user input and return mock response for now"""
+    """Process user input using AI Grant Agent"""
     try:
         data = request.get_json()
         
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-            
-        # Mock response for testing
-        mock_grants = [
-            {
-                'id': 1,
-                'title': 'Young Entrepreneurs Grant',
-                'amount': '$50,000',
-                'deadline': '2025-03-15',
-                'country': 'USA',
-                'sector': 'Technology',
-                'eligibility': 'Student-led startups under 25',
-                'source': 'SBA Youth Program',
-                'apply_link': 'https://example.com/apply1'
-            },
-            {
-                'id': 2,
-                'title': 'Innovation Catalyst Fund',
-                'amount': '$25,000',
-                'deadline': '2025-04-30',
-                'country': 'Canada',
-                'sector': 'AI/ML',
-                'eligibility': 'Early-stage tech companies',
-                'source': 'Canadian Innovation Fund',
-                'apply_link': 'https://example.com/apply2'
-            }
-        ]
         
-        return jsonify({
-            'status': 'success',
-            'input_received': data,
-            'grants': mock_grants,
-            'message': 'Mock data returned successfully'
-        })
+        # Determine the mode (form or chat)
+        mode = data.get('mode', 'form')
+        
+        # Use Grant Agent to find grants
+        agent_result = grant_agent.find_grants(data, mode)
+        
+        # Return the agent's response
+        return jsonify(agent_result)
         
     except Exception as e:
+        print(f"❌ Process input error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/send-email', methods=['POST'])
@@ -97,6 +76,29 @@ def send_email():
             return jsonify({'error': result['message']}), 500
             
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/clarify', methods=['POST'])
+def handle_clarification():
+    """Handle agent clarification responses"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Get original query and selected clarification option
+        original_query = data.get('original_query', {})
+        clarification_choice = data.get('clarification_choice')
+        
+        # Modify query based on clarification and re-run search
+        modified_query = grant_agent.apply_clarification(original_query, clarification_choice)
+        agent_result = grant_agent.find_grants(modified_query, data.get('mode', 'form'))
+        
+        return jsonify(agent_result)
+        
+    except Exception as e:
+        print(f"❌ Clarification error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/health', methods=['GET'])

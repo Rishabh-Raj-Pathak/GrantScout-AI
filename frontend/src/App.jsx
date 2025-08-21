@@ -1,6 +1,7 @@
 import { useState } from "react";
 import GrantFinderForm from "./components/GrantFinderForm";
 import GrantCards from "./components/GrantCards";
+import ClarificationModal from "./components/ClarificationModal";
 import "./App.css";
 
 function App() {
@@ -21,22 +22,41 @@ function App() {
     ],
     isActive: false,
   });
+  const [clarification, setClarification] = useState(null);
+  const [originalQuery, setOriginalQuery] = useState(null);
+  const [clarificationLoading, setClarificationLoading] = useState(false);
 
   const handleFormSubmit = async (formData) => {
     setLoading(true);
     setError(null);
+    setClarification(null);
+    setOriginalQuery(formData);
     setAgentProgress((prev) => ({ ...prev, isActive: true, currentStep: 0 }));
+
+    // Use real agent steps from backend
+    const agentSteps = [
+      "Parsing user criteria",
+      "Searching grant databases",
+      "Filtering by eligibility",
+      "Validating grant details",
+      "Ranking by relevance",
+      "Preparing recommendations",
+    ];
 
     // Simulate agent progress
     const progressInterval = setInterval(() => {
       setAgentProgress((prev) => {
-        if (prev.currentStep < prev.steps.length - 1) {
-          return { ...prev, currentStep: prev.currentStep + 1 };
+        if (prev.currentStep < agentSteps.length - 1) {
+          return {
+            ...prev,
+            currentStep: prev.currentStep + 1,
+            steps: agentSteps,
+          };
         }
         clearInterval(progressInterval);
         return prev;
       });
-    }, 800);
+    }, 1200);
 
     try {
       const response = await fetch("http://localhost:5000/process-input", {
@@ -52,24 +72,31 @@ function App() {
       }
 
       const data = await response.json();
-      setGrants(data.grants || []);
-      setLastFilters(formData);
 
-      // Save search to history
-      const searchHistory = JSON.parse(
-        localStorage.getItem("searchHistory") || "[]"
-      );
-      const newSearch = {
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        filters: formData,
-        resultsCount: data.grants?.length || 0,
-      };
-      searchHistory.unshift(newSearch);
-      localStorage.setItem(
-        "searchHistory",
-        JSON.stringify(searchHistory.slice(0, 10))
-      ); // Keep last 10 searches
+      // Check if agent needs clarification
+      if (data.clarification && data.clarification.needed) {
+        setClarification(data.clarification);
+        setGrants([]); // Clear previous results
+      } else {
+        setGrants(data.grants || []);
+        setLastFilters(formData);
+
+        // Save search to history
+        const searchHistory = JSON.parse(
+          localStorage.getItem("searchHistory") || "[]"
+        );
+        const newSearch = {
+          id: Date.now(),
+          timestamp: new Date().toISOString(),
+          filters: formData,
+          resultsCount: data.grants?.length || 0,
+        };
+        searchHistory.unshift(newSearch);
+        localStorage.setItem(
+          "searchHistory",
+          JSON.stringify(searchHistory.slice(0, 10))
+        );
+      }
     } catch (err) {
       setError(err.message);
       clearInterval(progressInterval);
@@ -81,9 +108,63 @@ function App() {
     }
   };
 
+  const handleClarificationChoice = async (choice) => {
+    setClarificationLoading(true);
+    setClarification(null);
+
+    try {
+      const response = await fetch("http://localhost:5000/clarify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          original_query: originalQuery,
+          clarification_choice: choice,
+          mode: originalQuery?.mode || "form",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process clarification");
+      }
+
+      const data = await response.json();
+      setGrants(data.grants || []);
+      setLastFilters(originalQuery);
+
+      // Save refined search to history
+      const searchHistory = JSON.parse(
+        localStorage.getItem("searchHistory") || "[]"
+      );
+      const newSearch = {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        filters: { ...originalQuery, clarification: choice },
+        resultsCount: data.grants?.length || 0,
+      };
+      searchHistory.unshift(newSearch);
+      localStorage.setItem(
+        "searchHistory",
+        JSON.stringify(searchHistory.slice(0, 10))
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setClarificationLoading(false);
+    }
+  };
+
+  const handleClarificationCancel = () => {
+    setClarification(null);
+    setClarificationLoading(false);
+  };
+
   const handleReset = () => {
     setGrants([]);
     setError(null);
+    setClarification(null);
+    setOriginalQuery(null);
     setAgentProgress((prev) => ({ ...prev, isActive: false, currentStep: 0 }));
   };
 
@@ -138,6 +219,11 @@ function App() {
                     <div className="text-sm text-gray-600">
                       {search.resultsCount} grant
                       {search.resultsCount !== 1 ? "s" : ""} found
+                      {search.emailSent && (
+                        <span className="ml-2 text-green-600">
+                          📧 Email sent to {search.emailSentTo}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <button
@@ -355,6 +441,14 @@ function App() {
             )}
           </div>
         </div>
+
+        {/* Clarification Modal */}
+        <ClarificationModal
+          clarification={clarification}
+          onChoose={handleClarificationChoice}
+          onCancel={handleClarificationCancel}
+          loading={clarificationLoading}
+        />
       </div>
     </div>
   );

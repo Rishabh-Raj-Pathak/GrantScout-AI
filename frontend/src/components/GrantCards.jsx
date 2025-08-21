@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const GrantCard = ({ grant }) => {
   const [saved, setSaved] = useState(false);
@@ -125,16 +125,42 @@ const GrantCards = ({ grants, filters }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailOptIn, setEmailOptIn] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+  // Load email preferences from localStorage
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("userEmail");
+    const savedOptIn = localStorage.getItem("emailOptIn") === "true";
+
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+    setEmailOptIn(savedOptIn);
+  }, []);
+
+  const showToastMessage = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 4000);
+  };
 
   const handleSendEmail = async (e) => {
     e.preventDefault();
     if (!email.trim()) {
-      alert("Please enter your email address");
+      showToastMessage("❌ Please enter your email address");
       return;
     }
 
     setSendingEmail(true);
     try {
+      // Save email preferences if opted in
+      if (emailOptIn) {
+        localStorage.setItem("userEmail", email.trim());
+        localStorage.setItem("emailOptIn", "true");
+      }
+
       const response = await fetch("http://localhost:5000/send-email", {
         method: "POST",
         headers: {
@@ -150,14 +176,25 @@ const GrantCards = ({ grants, filters }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("✅ Grant digest sent successfully! Check your email.");
+        showToastMessage(
+          "✅ Grant digest sent successfully! Check your email."
+        );
         setShowEmailForm(false);
-        setEmail("");
+
+        // Save search result with email sent flag
+        const searchHistory = JSON.parse(
+          localStorage.getItem("searchHistory") || "[]"
+        );
+        if (searchHistory.length > 0) {
+          searchHistory[0].emailSent = true;
+          searchHistory[0].emailSentTo = email.trim();
+          localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
+        }
       } else {
-        alert(`❌ Failed to send email: ${data.error}`);
+        showToastMessage(`❌ Failed to send email: ${data.error}`);
       }
     } catch (error) {
-      alert(`❌ Failed to send email: ${error.message}`);
+      showToastMessage(`❌ Failed to send email: ${error.message}`);
     } finally {
       setSendingEmail(false);
     }
@@ -200,29 +237,41 @@ const GrantCards = ({ grants, filters }) => {
         </div>
 
         {showEmailForm && (
-          <form onSubmit={handleSendEmail} className="mt-4 flex space-x-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address"
-              className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-            <button
-              type="submit"
-              disabled={sendingEmail}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {sendingEmail ? (
-                <span className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Sending...
-                </span>
-              ) : (
-                "Send"
-              )}
-            </button>
+          <form onSubmit={handleSendEmail} className="mt-4 space-y-3">
+            <div className="flex space-x-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email address"
+                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+              <button
+                type="submit"
+                disabled={sendingEmail}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sendingEmail ? (
+                  <span className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Sending...
+                  </span>
+                ) : (
+                  "📧 Send"
+                )}
+              </button>
+            </div>
+
+            <label className="flex items-center text-sm text-blue-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={emailOptIn}
+                onChange={(e) => setEmailOptIn(e.target.checked)}
+                className="mr-2 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+              />
+              Remember my email for future grant digests
+            </label>
           </form>
         )}
       </div>
@@ -233,6 +282,36 @@ const GrantCards = ({ grants, filters }) => {
           <GrantCard key={grant.id} grant={grant} />
         ))}
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 max-w-sm">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              {toastMessage.includes("✅") ? (
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-sm">✓</span>
+                </div>
+              ) : (
+                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 text-sm">✕</span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                {toastMessage.replace(/[✅❌]/g, "").trim()}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowToast(false)}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+            >
+              <span className="sr-only">Close</span>✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
