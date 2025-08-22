@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const GrantCard = ({ grant }) => {
+const GrantCard = ({ grant, userProfile }) => {
   const [saved, setSaved] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -19,19 +19,79 @@ const GrantCard = ({ grant }) => {
       const updated = savedGrants.filter((g) => g.id !== grant.id);
       localStorage.setItem("savedGrants", JSON.stringify(updated));
     } else {
-      // Add to saved
-      savedGrants.push(grant);
+      // Add to saved with enhanced data for reminders
+      const grantToSave = {
+        ...grant,
+        savedAt: new Date().toISOString(),
+        // Ensure deadline is properly formatted
+        deadline: grant.deadline || null,
+        // Add metadata for better reminder functionality
+        reminderPrefs: {
+          enabled: true,
+          notifyDays: [30, 14, 7, 1], // Notify 30, 14, 7, and 1 day before deadline
+        },
+      };
+      savedGrants.push(grantToSave);
       localStorage.setItem("savedGrants", JSON.stringify(savedGrants));
     }
   };
 
   const getWhyGrantText = () => {
-    return `This grant matches your criteria because:
-    • Located in ${grant.country} (matches your location preference)
-    • Focused on ${grant.sector} sector (matches your industry)
-    • Funding amount: ${grant.amount} (suitable for your stage)
-    • Deadline: ${grant.deadline} (gives you time to apply)
-    • Eligibility: ${grant.eligibility}`;
+    const matches = [];
+
+    // Profile-based matches
+    if (userProfile?.industry && grant.sector) {
+      matches.push(
+        `🏭 Industry match: ${grant.sector} aligns with your ${userProfile.industry} focus`
+      );
+    }
+
+    if (userProfile?.region && grant.country) {
+      if (
+        userProfile.region === "Global" ||
+        grant.country.toLowerCase().includes(userProfile.region.toLowerCase())
+      ) {
+        matches.push(
+          `🌍 Location match: ${grant.country} is in your target region`
+        );
+      }
+    }
+
+    if (userProfile?.stage && grant.stage) {
+      matches.push(
+        `🚀 Stage match: Suitable for ${userProfile.stage} stage startups`
+      );
+    }
+
+    if (userProfile?.nonDilutiveOnly && grant.nonDilutive !== false) {
+      matches.push(
+        `💎 Non-dilutive: No equity required (matches your preference)`
+      );
+    }
+
+    // Grant-specific matches
+    if (grant.amount) {
+      matches.push(`💰 Funding: ${grant.amount} available`);
+    }
+
+    if (grant.deadline) {
+      const deadline = new Date(grant.deadline);
+      const now = new Date();
+      const daysUntil = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+      if (daysUntil > 0) {
+        matches.push(`⏰ Deadline: ${daysUntil} days to apply`);
+      }
+    }
+
+    if (grant.eligibility) {
+      matches.push(`✅ Eligibility: ${grant.eligibility}`);
+    }
+
+    if (matches.length === 0) {
+      return "This grant was included based on your search criteria.";
+    }
+
+    return `Why this grant matches your profile:\n\n${matches.join("\n")}`;
   };
 
   return (
@@ -67,6 +127,18 @@ const GrantCard = ({ grant }) => {
       <h3 className="text-lg font-semibold text-gray-900 mb-3">
         {grant.title}
       </h3>
+
+      {/* Quick Match Indicator */}
+      {userProfile && (
+        <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-800 font-medium">
+            🎯 Matches your profile:{" "}
+            {userProfile.industry && grant.sector ? `${grant.sector}` : ""}
+            {userProfile.region && grant.country ? `, ${grant.country}` : ""}
+            {userProfile.nonDilutiveOnly ? ", non-dilutive" : ""}
+          </p>
+        </div>
+      )}
 
       {/* Tags */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -147,7 +219,7 @@ const GrantCard = ({ grant }) => {
   );
 };
 
-const GrantCards = ({ grants, filters }) => {
+const GrantCards = ({ grants, filters, userProfile }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -217,10 +289,17 @@ const GrantCards = ({ grants, filters }) => {
           localStorage.setItem("searchHistory", JSON.stringify(searchHistory));
         }
       } else {
-        showToastMessage(`❌ Failed to send email: ${data.error}`);
+        const errorMsg = data.error || "Unknown error occurred";
+        showToastMessage(`❌ Email failed: ${errorMsg}`);
       }
     } catch (error) {
-      showToastMessage(`❌ Failed to send email: ${error.message}`);
+      console.error("Email send failed:", error);
+      const friendlyError = error.message.includes("fetch")
+        ? "Unable to connect to email service. Please check your connection."
+        : error.message.includes("timeout")
+        ? "Email service is taking too long to respond. Please try again."
+        : `Email failed: ${error.message}`;
+      showToastMessage(`❌ ${friendlyError}`);
     } finally {
       setSendingEmail(false);
     }
@@ -305,7 +384,7 @@ const GrantCards = ({ grants, filters }) => {
       {/* Grant Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {grants.map((grant) => (
-          <GrantCard key={grant.id} grant={grant} />
+          <GrantCard key={grant.id} grant={grant} userProfile={userProfile} />
         ))}
       </div>
 

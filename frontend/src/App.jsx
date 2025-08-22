@@ -98,7 +98,13 @@ function App() {
         );
       }
     } catch (err) {
-      setError(err.message);
+      console.error("Grant search failed:", err);
+      const friendlyError = err.message.includes("fetch")
+        ? "Unable to connect to our grant database. Please check your internet connection and try again."
+        : err.message.includes("timeout")
+        ? "The search is taking longer than expected. Please try a simpler search or try again later."
+        : `Search failed: ${err.message}. Please try again or contact support if the problem persists.`;
+      setError(friendlyError);
       clearInterval(progressInterval);
     } finally {
       setLoading(false);
@@ -149,7 +155,11 @@ function App() {
         JSON.stringify(searchHistory.slice(0, 10))
       );
     } catch (err) {
-      setError(err.message);
+      console.error("Clarification failed:", err);
+      const friendlyError = err.message.includes("fetch")
+        ? "Unable to process your clarification. Please check your connection and try again."
+        : `Clarification failed: ${err.message}. Please try again.`;
+      setError(friendlyError);
     } finally {
       setClarificationLoading(false);
     }
@@ -166,6 +176,181 @@ function App() {
     setClarification(null);
     setOriginalQuery(null);
     setAgentProgress((prev) => ({ ...prev, isActive: false, currentStep: 0 }));
+  };
+
+  const renderSavedGrants = () => {
+    const savedGrants = JSON.parse(localStorage.getItem("savedGrants") || "[]");
+
+    // Calculate deadline reminders
+    const now = new Date();
+    const upcomingDeadlines = savedGrants
+      .filter((grant) => {
+        if (!grant.deadline) return false;
+        const deadline = new Date(grant.deadline);
+        const daysUntil = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+        return daysUntil > 0 && daysUntil <= 30; // Next 30 days
+      })
+      .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Saved Grants</h2>
+          <div className="text-sm text-gray-500">
+            ⭐ {savedGrants.length} saved grant
+            {savedGrants.length !== 1 ? "s" : ""}
+          </div>
+        </div>
+
+        {/* Deadline Reminders */}
+        {upcomingDeadlines.length > 0 && (
+          <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h3 className="text-lg font-medium text-yellow-800 mb-3 flex items-center">
+              ⚠️ Upcoming Deadlines
+            </h3>
+            <div className="space-y-2">
+              {upcomingDeadlines.map((grant) => {
+                const deadline = new Date(grant.deadline);
+                const daysUntil = Math.ceil(
+                  (deadline - now) / (1000 * 60 * 60 * 24)
+                );
+                return (
+                  <div
+                    key={grant.id}
+                    className="flex items-center justify-between p-3 bg-white rounded border border-yellow-300"
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">{grant.title}</p>
+                      <p className="text-sm text-gray-600">
+                        Deadline: {deadline.toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          daysUntil <= 7
+                            ? "bg-red-100 text-red-800"
+                            : daysUntil <= 14
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {daysUntil} day{daysUntil !== 1 ? "s" : ""} left
+                      </span>
+                      <a
+                        href={grant.apply_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Apply →
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {savedGrants.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-6xl mb-4">⭐</div>
+            <p className="text-lg mb-2">No saved grants yet</p>
+            <p className="text-sm">
+              Save grants from search results to track deadlines and build your
+              application list.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {savedGrants.map((grant) => {
+              const deadline = grant.deadline ? new Date(grant.deadline) : null;
+              const daysUntil = deadline
+                ? Math.ceil((deadline - now) / (1000 * 60 * 60 * 24))
+                : null;
+
+              return (
+                <div
+                  key={grant.id}
+                  className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {grant.title}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        const updatedGrants = savedGrants.filter(
+                          (g) => g.id !== grant.id
+                        );
+                        localStorage.setItem(
+                          "savedGrants",
+                          JSON.stringify(updatedGrants)
+                        );
+                        setCurrentView("saved"); // Refresh view
+                      }}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      title="Remove from saved"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Deadline Alert */}
+                  {daysUntil !== null && daysUntil > 0 && (
+                    <div
+                      className={`mb-3 p-2 rounded-lg ${
+                        daysUntil <= 7
+                          ? "bg-red-50 border border-red-200"
+                          : daysUntil <= 14
+                          ? "bg-yellow-50 border border-yellow-200"
+                          : "bg-blue-50 border border-blue-200"
+                      }`}
+                    >
+                      <p
+                        className={`text-sm font-medium ${
+                          daysUntil <= 7
+                            ? "text-red-800"
+                            : daysUntil <= 14
+                            ? "text-yellow-800"
+                            : "text-blue-800"
+                        }`}
+                      >
+                        ⏰ Deadline in {daysUntil} day
+                        {daysUntil !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                      {grant.country}
+                    </span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                      {grant.sector}
+                    </span>
+                  </div>
+
+                  <div className="text-lg font-semibold text-gray-900 mb-2">
+                    {grant.amount}
+                  </div>
+
+                  <a
+                    href={grant.apply_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-blue-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors block"
+                  >
+                    📝 Apply Now
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderSearchHistory = () => {
@@ -296,6 +481,18 @@ function App() {
                 <span className="sm:hidden">🕒</span>
                 <span className="hidden sm:inline">🕒 History</span>
               </button>
+
+              <button
+                onClick={() => setCurrentView("saved")}
+                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                  currentView === "saved"
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="sm:hidden">⭐</span>
+                <span className="hidden sm:inline">⭐ Saved</span>
+              </button>
             </div>
           </div>
         </div>
@@ -344,18 +541,18 @@ function App() {
                       {step}
                       {index === agentProgress.currentStep && (
                         <div className="text-xs text-blue-600 mt-1">
-                          {step === "Parse Inputs" &&
-                            "Analyzing search criteria and preferences"}
-                          {step === "Query Sources" &&
-                            "Searching government and organization databases"}
-                          {step === "Filter Results" &&
-                            "Applying eligibility and criteria filters"}
-                          {step === "Validate Data" &&
-                            "Checking grant details and deadlines"}
-                          {step === "Rank Matches" &&
-                            "Sorting by relevance and deadline proximity"}
-                          {step === "Deliver Results" &&
-                            "Preparing final grant recommendations"}
+                          {step === "Parsing user criteria" &&
+                            "Analyzing your founder profile and search preferences"}
+                          {step === "Searching grant databases" &&
+                            "Searching government, foundation, and organization databases"}
+                          {step === "Filtering by eligibility" &&
+                            "Applying eligibility criteria and founder type filters"}
+                          {step === "Validating grant details" &&
+                            "Verifying grant details, deadlines, and application links"}
+                          {step === "Ranking by relevance" &&
+                            "Sorting by profile match and deadline proximity"}
+                          {step === "Preparing recommendations" &&
+                            "Generating match explanations and final results"}
                         </div>
                       )}
                     </div>
@@ -424,10 +621,32 @@ function App() {
                 />
 
                 {error && (
-                  <div className="mt-6 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700">
-                    <p>
-                      <strong>Error:</strong> {error}
-                    </p>
+                  <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <span className="text-red-400 text-xl">⚠️</span>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">
+                          Something went wrong
+                        </h3>
+                        <p className="mt-1 text-sm text-red-700">{error}</p>
+                        <div className="mt-4">
+                          <button
+                            onClick={() => setError(null)}
+                            className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                          >
+                            Dismiss
+                          </button>
+                          <button
+                            onClick={handleReset}
+                            className="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                          >
+                            Try Again
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -448,13 +667,19 @@ function App() {
                       Found {grants.length} Grant
                       {grants.length !== 1 ? "s" : ""}
                     </h2>
-                    <GrantCards grants={grants} filters={lastFilters} />
+                    <GrantCards
+                      grants={grants}
+                      filters={lastFilters}
+                      userProfile={lastFilters}
+                    />
                   </div>
                 )}
               </>
             )}
 
             {currentView === "history" && renderSearchHistory()}
+
+            {currentView === "saved" && renderSavedGrants()}
 
             {currentView === "email" && (
               <div className="bg-white rounded-xl shadow-lg p-8">

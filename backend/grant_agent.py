@@ -123,23 +123,39 @@ class GrantAgent:
             return self._fallback_error_response(user_input, error=str(e))
     
     def _build_query(self, user_input, mode):
-        """Build a structured query for grant search"""
+        """Build a structured query for grant search using founder profile"""
         if mode == "chat":
             # For natural language input, use LLM to extract criteria
             return self._extract_criteria_from_natural_language(user_input.get('query', ''))
         else:
-            # For form input, use structured data
+            # For form input, use new founder profile structure
             criteria = []
-            if user_input.get('country'):
-                criteria.append(f"grants available in {user_input['country']}")
-            if user_input.get('sector'):
-                criteria.append(f"for {user_input['sector']} sector")
+            
+            # Core profile requirements
+            if user_input.get('industry'):
+                criteria.append(f"for {user_input['industry']} industry")
+            if user_input.get('region'):
+                if user_input['region'] != 'Global':
+                    criteria.append(f"available in {user_input['region']}")
+                else:
+                    criteria.append("with global eligibility")
             if user_input.get('stage'):
                 criteria.append(f"suitable for {user_input['stage']} stage startups")
+                
+            # Additional preferences
+            if user_input.get('nonDilutiveOnly'):
+                criteria.append("non-dilutive funding (no equity required)")
             if user_input.get('founderType'):
                 criteria.append(f"for {user_input['founderType']} founders")
+            if user_input.get('deadlineWindow'):
+                criteria.append(f"with deadlines {user_input['deadlineWindow']}")
                 
-            return f"Find startup grants {' '.join(criteria)}"
+            # Include description if provided
+            base_query = f"Find startup grants {' '.join(criteria)}"
+            if user_input.get('description'):
+                base_query += f". Additional context: {user_input['description']}"
+                
+            return base_query
     
     def _extract_criteria_from_natural_language(self, query):
         """Use LLM to extract structured criteria from natural language"""
@@ -360,75 +376,167 @@ class GrantAgent:
             return grants[:5]  # Return first 5 raw grants as fallback
     
     def _check_need_clarification(self, grants, user_input):
-        """Check if agent needs clarification from user"""
+        """Check if agent needs clarification from user with empathetic approach"""
+        
+        # Step 1: Gentle paraphrase + confirm intent
+        if grants and len(grants) > 0:
+            paraphrase = self._generate_paraphrase(user_input)
+            if paraphrase.get('needed', False):
+                return paraphrase
+        
+        # Step 2: Context-specific clarifications
         if not grants:
             return {
                 'needed': True,
-                'question': "I couldn't find grants matching your exact criteria. Would you like me to:",
+                'question': "I'm having trouble finding grants that match your exact criteria. One quick question to help me refine results...",
                 'options': [
-                    'Broaden the search to include more countries',
-                    'Look for grants in related sectors',
-                    'Include earlier/later stage opportunities',
-                    'Search for different funding types'
+                    'Focus on global grants or just your region?',
+                    'Broaden to include related industries?',
+                    'Include earlier/later stage opportunities?',
+                    'I\'m having trouble understanding your preference - would you like me to proceed with general grant results instead?'
                 ]
             }
         
-        if len(grants) > 20:
+        if len(grants) > 15:
             return {
                 'needed': True,
-                'question': f"I found {len(grants)} potential grants. Would you like me to:",
+                'question': f"Great! I found {len(grants)} potential grants. Just to narrow this down...",
                 'options': [
+                    'Focus on global grants or just your region?',
+                    'Prefer non-dilutive grants only?',
                     'Show only the most relevant ones',
-                    'Filter by specific deadline range',
-                    'Focus on larger funding amounts',
-                    'Prioritize specific countries'
+                    'Filter by deadline proximity (closing soon)'
+                ]
+            }
+            
+        # Step 3: Feature-specific probing when needed
+        if self._should_ask_about_features(user_input):
+            return {
+                'needed': True,
+                'question': "Reminder feature's available - would you like me to alert you before a grant deadline?",
+                'options': [
+                    'Yes, remind me about deadlines',
+                    'No, just show the grants',
+                    'Only for the most promising ones'
                 ]
             }
             
         return {'needed': False}
     
+    def _generate_paraphrase(self, user_input):
+        """Generate empathetic paraphrase to confirm understanding"""
+        try:
+            # Only paraphrase if user input is ambiguous
+            if user_input.get('mode') == 'chat' and len(user_input.get('query', '').split()) > 10:
+                query = user_input.get('query', '')
+                
+                response = self.llm_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """You are a helpful grant search assistant. Create a gentle paraphrase to confirm understanding.
+                            
+                            If the user query is clear and specific, return {"needed": false}.
+                            If ambiguous or complex, return a paraphrase question like:
+                            "Just to make sure I understand: you're looking for [summary], is that right?"
+                            
+                            Only ask if genuinely needed for clarity."""
+                        },
+                        {
+                            "role": "user",
+                            "content": f"User query: '{query}'"
+                        }
+                    ],
+                    temperature=0.3,
+                    max_tokens=150
+                )
+                
+                content = response.choices[0].message.content
+                if content and 'needed": true' in content.lower():
+                    return {
+                        'needed': True,
+                        'question': content.strip(),
+                        'options': ['Yes, that\'s correct', 'Let me clarify...']
+                    }
+                    
+        except Exception as e:
+            print(f"⚠️ Paraphrase generation failed: {e}")
+            
+        return {'needed': False}
+    
+    def _should_ask_about_features(self, user_input):
+        """Determine if we should ask about reminder features"""
+        # Ask about reminders for first-time users or when grants have tight deadlines
+        return False  # Simplified for now
+    
     def apply_clarification(self, original_query, clarification_choice):
-        """Apply user's clarification choice to modify the search query"""
+        """Apply user's clarification choice to modify the search query with empathetic approach"""
         try:
             modified_query = original_query.copy()
+            choice_lower = clarification_choice.lower()
             
-            # Apply different modifications based on clarification choice
-            if 'broaden' in clarification_choice.lower():
-                # Remove restrictive filters
-                if 'country' in modified_query:
-                    modified_query.pop('country', None)
-                    
-            elif 'related sectors' in clarification_choice.lower():
-                # Expand sector search
-                if modified_query.get('sector'):
-                    sector_map = {
-                        'AI': 'Technology, AI, Machine Learning, Software',
-                        'Health': 'Healthcare, Biotech, Medical Technology',
-                        'Climate': 'Clean Technology, Environment, Sustainability'
+            # Handle empathetic clarification choices
+            if 'global grants' in choice_lower:
+                # Expand to global search
+                modified_query['region'] = 'Global'
+                modified_query['expand_geographic'] = True
+                
+            elif 'just your region' in choice_lower or 'focus.*region' in choice_lower:
+                # Keep regional focus
+                modified_query['geographic_focus'] = 'regional'
+                
+            elif 'non-dilutive grants only' in choice_lower or 'non-dilutive.*only' in choice_lower:
+                # Filter for non-dilutive only
+                modified_query['nonDilutiveOnly'] = True
+                modified_query['equity_free'] = True
+                
+            elif 'broaden.*related industries' in choice_lower or 'related industries' in choice_lower:
+                # Expand sector search using industry mapping
+                if modified_query.get('industry'):
+                    industry_map = {
+                        'AI/ML': 'AI, Machine Learning, Technology, Software, Data Science',
+                        'Healthcare': 'Healthcare, Biotech, Medical Technology, Life Sciences',
+                        'Climate': 'Clean Technology, Environment, Sustainability, Green Energy',
+                        'Fintech': 'Financial Technology, Banking, Payments, Blockchain',
+                        'Education': 'Education Technology, Learning, Training, Academic'
                     }
-                    original_sector = modified_query['sector']
-                    modified_query['sector'] = sector_map.get(original_sector, original_sector)
+                    original_industry = modified_query['industry']
+                    modified_query['sector_expanded'] = industry_map.get(original_industry, original_industry)
                     
-            elif 'stage' in clarification_choice.lower():
+            elif 'earlier/later stage' in choice_lower:
                 # Expand stage criteria
-                stage_map = {
+                stage_expansions = {
                     'Seed': 'Pre-Seed, Seed, Early Revenue',
-                    'Pre-Seed': 'Idea Stage, Pre-Seed, Seed'
+                    'Pre-Seed': 'Idea, Pre-Seed, Seed',
+                    'Growth': 'Early Revenue, Growth, Scale-up'
                 }
                 original_stage = modified_query.get('stage', '')
-                modified_query['stage'] = stage_map.get(original_stage, original_stage)
+                modified_query['stage_expanded'] = stage_expansions.get(original_stage, original_stage)
                 
-            elif 'relevant' in clarification_choice.lower():
-                # Add relevance boost flag
+            elif 'most relevant' in choice_lower:
+                # Boost relevance scoring
                 modified_query['boost_relevance'] = True
+                modified_query['limit_results'] = 10
                 
-            elif 'deadline' in clarification_choice.lower():
-                # Add deadline filter
-                modified_query['deadline_filter'] = 'next_6_months'
+            elif 'deadline proximity' in choice_lower or 'closing soon' in choice_lower:
+                # Filter by deadline
+                modified_query['deadline_filter'] = 'next_60_days'
                 
-            elif 'larger funding' in clarification_choice.lower():
-                # Add minimum amount filter
-                modified_query['min_amount'] = 25000
+            elif 'general grant results' in choice_lower:
+                # Fallback to general search
+                modified_query['fallback_mode'] = True
+                # Remove restrictive filters
+                for key in ['nonDilutiveOnly', 'founderType']:
+                    modified_query.pop(key, None)
+                    
+            elif 'that\'s correct' in choice_lower or 'yes.*correct' in choice_lower:
+                # User confirmed understanding - proceed with original query
+                modified_query['confirmed'] = True
+                
+            elif 'let me clarify' in choice_lower:
+                # User wants to clarify - return to form
+                modified_query['needs_reclarification'] = True
                 
             return modified_query
             

@@ -17,6 +17,11 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
       stage: "",
       founderType: "",
       mode: "form", // 'form' or 'chat'
+      // New founder profile fields
+      industry: "",
+      region: "",
+      nonDilutiveOnly: false,
+      description: "",
     };
   });
 
@@ -79,25 +84,55 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (formData.mode === "chat") {
-      if (!chatInput.trim()) {
-        alert("Please enter your grant search query");
-        return;
+    try {
+      if (formData.mode === "chat") {
+        if (!chatInput.trim()) {
+          alert("Please enter your grant search query to continue.");
+          return;
+        }
+        if (chatInput.trim().length < 10) {
+          alert(
+            "Please provide a more detailed search query (at least 10 characters)."
+          );
+          return;
+        }
+        onSubmit({
+          mode: "chat",
+          query: chatInput.trim(),
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        // Validate required fields
+        const missingFields = [];
+        if (!formData.industry) missingFields.push("Industry");
+        if (!formData.region) missingFields.push("Region");
+        if (!formData.stage) missingFields.push("Stage");
+
+        if (missingFields.length > 0) {
+          alert(
+            `Please fill in the following required fields: ${missingFields.join(
+              ", "
+            )}`
+          );
+          return;
+        }
+
+        // Validate description length if provided
+        if (formData.description && formData.description.length > 500) {
+          alert(
+            "Description is too long. Please keep it under 500 characters."
+          );
+          return;
+        }
+
+        onSubmit({
+          ...formData,
+          timestamp: new Date().toISOString(),
+        });
       }
-      onSubmit({
-        mode: "chat",
-        query: chatInput,
-        timestamp: new Date().toISOString(),
-      });
-    } else {
-      if (!formData.country || !formData.sector || !formData.stage) {
-        alert("Please fill in all required fields");
-        return;
-      }
-      onSubmit({
-        ...formData,
-        timestamp: new Date().toISOString(),
-      });
+    } catch (error) {
+      console.error("Form submission error:", error);
+      alert("An error occurred while submitting the form. Please try again.");
     }
   };
 
@@ -108,6 +143,10 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
       stage: "",
       founderType: "",
       mode: "form",
+      industry: "",
+      region: "",
+      nonDilutiveOnly: false,
+      description: "",
     });
     setChatInput("");
     onReset();
@@ -146,89 +185,152 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
       <form onSubmit={handleSubmit}>
         {formData.mode === "form" ? (
           <div>
-            {/* Description */}
+            {/* Founder Profile Section */}
+            <div className="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                👤 Your Founder Profile
+                <span className="ml-2 text-sm font-normal text-gray-600">
+                  (helps us find better matches)
+                </span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Primary Industry *
+                  </label>
+                  <select
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select your industry</option>
+                    <option value="AI/ML">AI/Machine Learning</option>
+                    <option value="Healthcare">Healthcare & Biotech</option>
+                    <option value="Fintech">Financial Technology</option>
+                    <option value="Climate">Climate & Clean Tech</option>
+                    <option value="Education">Education Technology</option>
+                    <option value="E-commerce">E-commerce & Retail</option>
+                    <option value="SaaS">Software as a Service</option>
+                    <option value="Hardware">Hardware & IoT</option>
+                    <option value="Cybersecurity">Cybersecurity</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Primary Region *
+                  </label>
+                  <select
+                    name="region"
+                    value={formData.region}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select your region</option>
+                    <option value="North America">North America</option>
+                    <option value="Europe">Europe</option>
+                    <option value="Asia Pacific">Asia Pacific</option>
+                    <option value="India">India</option>
+                    <option value="Latin America">Latin America</option>
+                    <option value="Middle East/Africa">
+                      Middle East & Africa
+                    </option>
+                    <option value="Global">Global (No Preference)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Startup Stage *
+                  </label>
+                  <select
+                    name="stage"
+                    value={formData.stage}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select stage</option>
+                    <option value="Idea">Idea Stage</option>
+                    <option value="Pre-Seed">Pre-Seed</option>
+                    <option value="Seed">Seed</option>
+                    <option value="Early Revenue">Early Revenue</option>
+                    <option value="Growth">Growth Stage</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Funding Preference
+                  </label>
+                  <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input
+                      type="checkbox"
+                      name="nonDilutiveOnly"
+                      checked={formData.nonDilutiveOnly}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          nonDilutiveOnly: e.target.checked,
+                        }))
+                      }
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-3 text-sm text-gray-700">
+                      💎 Non-dilutive grants only (no equity required)
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Brief Description (Optional)
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Tell us more about your startup (e.g., 'Building AI tools for healthcare providers')"
+                  rows={2}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Search Query */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Describe what you're looking for
+                Additional Search Terms (Optional)
               </label>
               <input
                 type="text"
+                name="description"
                 placeholder="Try: 'EU health grants for early-stage startups' or 'Climate grants closing this month'"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
               />
             </div>
 
-            {/* Countries Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                Countries
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "India",
-                  "United States",
-                  "European Union",
-                  "United Kingdom",
-                  "Canada",
-                  "Singapore",
-                  "Australia",
-                ].map((country) => (
-                  <button
-                    key={country}
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, country }))
-                    }
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      formData.country === country
-                        ? "bg-gray-900 text-white shadow-sm"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
-                    }`}
-                  >
-                    {country}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sectors Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                Sectors
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "AI",
-                  "Health",
-                  "Climate",
-                  "Education",
-                  "Cybersecurity",
-                  "Creative",
-                ].map((sector) => (
-                  <button
-                    key={sector}
-                    type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, sector }))}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      formData.sector === sector
-                        ? "bg-gray-900 text-white shadow-sm"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
-                    }`}
-                  >
-                    {sector}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Founder Criteria Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                Founder Criteria
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {["Women-led", "LGBTQ+", "Student-led", "Nonprofit"].map(
-                  (criteria) => (
+            {/* Additional Preferences */}
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Founder Type (Optional)
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "Women-led",
+                    "Student-led",
+                    "Minority-led",
+                    "First-time founder",
+                  ].map((criteria) => (
                     <button
                       key={criteria}
                       type="button"
@@ -239,63 +341,35 @@ const GrantFinderForm = ({ onSubmit, onReset, loading }) => {
                             prev.founderType === criteria ? "" : criteria,
                         }))
                       }
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      className={`px-3 py-2 text-sm rounded-lg font-medium transition-colors ${
                         formData.founderType === criteria
-                          ? "bg-gray-900 text-white shadow-sm"
+                          ? "bg-blue-600 text-white shadow-sm"
                           : "bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300"
                       }`}
                     >
                       {criteria}
                     </button>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Stage and Date Window */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Stage
+                  Deadline Preference
                 </h3>
                 <select
-                  name="stage"
-                  value={formData.stage}
+                  name="deadlineWindow"
+                  value={formData.deadlineWindow || ""}
                   onChange={handleInputChange}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select stage</option>
-                  <option value="Seed">Seed</option>
-                  <option value="Pre-Seed">Pre-Seed</option>
-                  <option value="Early Revenue">Early Revenue</option>
-                  <option value="Growth Stage">Growth Stage</option>
-                </select>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Date Window
-                </h3>
-                <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">Any deadline</option>
                   <option value="Active now">Active now</option>
-                  <option value="Closing soon">Closing soon</option>
+                  <option value="Closing soon">
+                    Closing soon (next 30 days)
+                  </option>
                   <option value="Opening soon">Opening soon</option>
                 </select>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Foreign-eligible only?
-                </h3>
-                <div className="flex items-center">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span className="ml-3 text-sm font-medium text-gray-900">
-                      No
-                    </span>
-                  </label>
-                </div>
               </div>
             </div>
           </div>
