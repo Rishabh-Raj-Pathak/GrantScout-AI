@@ -148,7 +148,7 @@ class CustomBrowserTool:
         forms = []
         for form in soup.find_all('form')[:5]:
             form_data = {
-                'action': form.get('action', ''),
+                'action': form.get('action', ''), # type: ignore
                 'method': form.get('method', 'GET'),
                 'inputs': []
             }

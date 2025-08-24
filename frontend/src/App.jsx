@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Home from "./components/Home";
 import GrantFinderForm from "./components/GrantFinderForm";
 import GrantCards from "./components/GrantCards";
 import ClarificationModal from "./components/ClarificationModal";
@@ -9,7 +10,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastFilters, setLastFilters] = useState(null);
-  const [currentView, setCurrentView] = useState("search"); // 'search', 'history', 'email'
+  const [currentView, setCurrentView] = useState("home"); // 'home', 'search', 'history', 'email'
   const [agentProgress, setAgentProgress] = useState({
     currentStep: 0,
     steps: [
@@ -168,6 +169,10 @@ function App() {
   const handleClarificationCancel = () => {
     setClarification(null);
     setClarificationLoading(false);
+  };
+
+  const handleGetStarted = () => {
+    setCurrentView("search");
   };
 
   const handleReset = () => {
@@ -432,75 +437,89 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Navigation */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <button
-                onClick={() => setCurrentView("search")}
-                className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
-              >
-                ✨ GrantFinder
-              </button>
-            </div>
+      {/* Header Navigation - Hidden on home view */}
+      {currentView !== "home" && (
+        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCurrentView("home")}
+                  className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+                >
+                  ✨ GrantFinder
+                </button>
+              </div>
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <button
-                onClick={() => setCurrentView("search")}
-                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
-                  currentView === "search"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span className="sm:hidden">🔍</span>
-                <span className="hidden sm:inline">🔍 Search</span>
-              </button>
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <button
+                  onClick={() => setCurrentView("home")}
+                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                    currentView === "home"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="sm:hidden">🏠</span>
+                  <span className="hidden sm:inline">🏠 Home</span>
+                </button>
 
-              <button
-                onClick={() => setCurrentView("email")}
-                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
-                  currentView === "email"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span className="sm:hidden">📧</span>
-                <span className="hidden sm:inline">📧 Email Digest</span>
-              </button>
+                <button
+                  onClick={() => setCurrentView("search")}
+                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                    currentView === "search"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="sm:hidden">🔍</span>
+                  <span className="hidden sm:inline">🔍 Search</span>
+                </button>
 
-              <button
-                onClick={() => setCurrentView("history")}
-                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
-                  currentView === "history"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span className="sm:hidden">🕒</span>
-                <span className="hidden sm:inline">🕒 History</span>
-              </button>
+                <button
+                  onClick={() => setCurrentView("email")}
+                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                    currentView === "email"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="sm:hidden">📧</span>
+                  <span className="hidden sm:inline">📧 Email Digest</span>
+                </button>
 
-              <button
-                onClick={() => setCurrentView("saved")}
-                className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
-                  currentView === "saved"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span className="sm:hidden">⭐</span>
-                <span className="hidden sm:inline">⭐ Saved</span>
-              </button>
+                <button
+                  onClick={() => setCurrentView("history")}
+                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                    currentView === "history"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="sm:hidden">🕒</span>
+                  <span className="hidden sm:inline">🕒 History</span>
+                </button>
+
+                <button
+                  onClick={() => setCurrentView("saved")}
+                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                    currentView === "saved"
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="sm:hidden">⭐</span>
+                  <span className="hidden sm:inline">⭐ Saved</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="flex">
         {/* Agent Progress Sidebar */}
-        {(agentProgress.isActive || loading) && (
+        {(agentProgress.isActive || loading) && currentView !== "home" && (
           <div className="hidden lg:block w-80 bg-white shadow-lg border-r border-gray-200 min-h-screen">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -570,7 +589,7 @@ function App() {
         {/* Main Content Area */}
         <div className="flex-1">
           {/* Mobile Progress Indicator */}
-          {(agentProgress.isActive || loading) && (
+          {(agentProgress.isActive || loading) && currentView !== "home" && (
             <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 p-4">
               <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-2">
@@ -600,105 +619,109 @@ function App() {
             </div>
           )}
 
-          <div className="max-w-6xl mx-auto px-4 py-8">
-            {currentView === "search" && (
-              <>
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                    Find Global Startup Grants
-                  </h1>
-                  <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
-                    Discover funding opportunities tailored to your startup
-                    using AI-powered search. Get personalized grant
-                    recommendations based on your profile and goals.
-                  </p>
-                </div>
+          {currentView === "home" ? (
+            <Home onGetStarted={handleGetStarted} />
+          ) : (
+            <div className="max-w-6xl mx-auto px-4 py-8">
+              {currentView === "search" && (
+                <>
+                  <div className="text-center mb-8">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                      Find Global Startup Grants
+                    </h1>
+                    <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
+                      Discover funding opportunities tailored to your startup
+                      using AI-powered search. Get personalized grant
+                      recommendations based on your profile and goals.
+                    </p>
+                  </div>
 
-                <GrantFinderForm
-                  onSubmit={handleFormSubmit}
-                  onReset={handleReset}
-                  loading={loading}
-                />
+                  <GrantFinderForm
+                    onSubmit={handleFormSubmit}
+                    onReset={handleReset}
+                    loading={loading}
+                  />
 
-                {error && (
-                  <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        <span className="text-red-400 text-xl">⚠️</span>
-                      </div>
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-800">
-                          Something went wrong
-                        </h3>
-                        <p className="mt-1 text-sm text-red-700">{error}</p>
-                        <div className="mt-4">
-                          <button
-                            onClick={() => setError(null)}
-                            className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-                          >
-                            Dismiss
-                          </button>
-                          <button
-                            onClick={handleReset}
-                            className="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
-                          >
-                            Try Again
-                          </button>
+                  {error && (
+                    <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <span className="text-red-400 text-xl">⚠️</span>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">
+                            Something went wrong
+                          </h3>
+                          <p className="mt-1 text-sm text-red-700">{error}</p>
+                          <div className="mt-4">
+                            <button
+                              onClick={() => setError(null)}
+                              className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                            >
+                              Dismiss
+                            </button>
+                            <button
+                              onClick={handleReset}
+                              className="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                            >
+                              Try Again
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {loading && (
-                  <div className="mt-8 text-center">
-                    <div className="inline-flex items-center px-6 py-3 bg-white rounded-lg shadow-md">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
-                      <span className="text-gray-700">
-                        Searching for grants...
-                      </span>
+                  {loading && (
+                    <div className="mt-8 text-center">
+                      <div className="inline-flex items-center px-6 py-3 bg-white rounded-lg shadow-md">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+                        <span className="text-gray-700">
+                          Searching for grants...
+                        </span>
+                      </div>
                     </div>
+                  )}
+
+                  {grants.length > 0 && (
+                    <div className="mt-8">
+                      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+                        Found {grants.length} Grant
+                        {grants.length !== 1 ? "s" : ""}
+                      </h2>
+                      <GrantCards
+                        grants={grants}
+                        filters={lastFilters}
+                        userProfile={lastFilters}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {currentView === "history" && renderSearchHistory()}
+
+              {currentView === "saved" && renderSavedGrants()}
+
+              {currentView === "email" && (
+                <div className="bg-white rounded-xl shadow-lg p-8">
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                    📧 Schedule Email Digest
+                  </h2>
+                  <div className="text-center py-12 text-gray-500">
+                    <div className="text-6xl mb-4">📬</div>
+                    <p className="text-lg mb-4">
+                      Email digest feature coming soon!
+                    </p>
+                    <p className="text-sm">
+                      You'll be able to schedule weekly grant updates directly
+                      to your inbox.
+                    </p>
                   </div>
-                )}
-
-                {grants.length > 0 && (
-                  <div className="mt-8">
-                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-                      Found {grants.length} Grant
-                      {grants.length !== 1 ? "s" : ""}
-                    </h2>
-                    <GrantCards
-                      grants={grants}
-                      filters={lastFilters}
-                      userProfile={lastFilters}
-                    />
-                  </div>
-                )}
-              </>
-            )}
-
-            {currentView === "history" && renderSearchHistory()}
-
-            {currentView === "saved" && renderSavedGrants()}
-
-            {currentView === "email" && (
-              <div className="bg-white rounded-xl shadow-lg p-8">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                  📧 Schedule Email Digest
-                </h2>
-                <div className="text-center py-12 text-gray-500">
-                  <div className="text-6xl mb-4">📬</div>
-                  <p className="text-lg mb-4">
-                    Email digest feature coming soon!
-                  </p>
-                  <p className="text-sm">
-                    You'll be able to schedule weekly grant updates directly to
-                    your inbox.
-                  </p>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Clarification Modal */}
