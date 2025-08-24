@@ -436,28 +436,35 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-950">
       {/* Header Navigation - Hidden on home view */}
       {currentView !== "home" && (
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <header className="bg-slate-950/90 backdrop-blur-sm shadow-xl border-b border-slate-800/50 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <button
                   onClick={() => setCurrentView("home")}
-                  className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+                  className="flex items-center space-x-3 text-white hover:text-indigo-300 transition-colors"
                 >
-                  ✨ GrantFinder
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg">
+                    <span className="text-white font-bold text-sm tracking-tight">
+                      SG
+                    </span>
+                  </div>
+                  <span className="text-xl font-bold tracking-tight">
+                    Grant Finder
+                  </span>
                 </button>
               </div>
 
               <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
                   onClick={() => setCurrentView("home")}
-                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                  className={`flex items-center px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 tracking-tight ${
                     currentView === "home"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
                   <span className="sm:hidden">🏠</span>
@@ -466,10 +473,10 @@ function App() {
 
                 <button
                   onClick={() => setCurrentView("search")}
-                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                  className={`flex items-center px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 tracking-tight ${
                     currentView === "search"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
                   <span className="sm:hidden">🔍</span>
@@ -478,22 +485,22 @@ function App() {
 
                 <button
                   onClick={() => setCurrentView("email")}
-                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                  className={`flex items-center px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 tracking-tight ${
                     currentView === "email"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
                   <span className="sm:hidden">📧</span>
-                  <span className="hidden sm:inline">📧 Email Digest</span>
+                  <span className="hidden sm:inline">📧 Email</span>
                 </button>
 
                 <button
                   onClick={() => setCurrentView("history")}
-                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                  className={`flex items-center px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 tracking-tight ${
                     currentView === "history"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
                   <span className="sm:hidden">🕒</span>
@@ -502,10 +509,10 @@ function App() {
 
                 <button
                   onClick={() => setCurrentView("saved")}
-                  className={`flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 ${
+                  className={`flex items-center px-3 sm:px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 tracking-tight ${
                     currentView === "saved"
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
                   <span className="sm:hidden">⭐</span>
@@ -520,46 +527,48 @@ function App() {
       <div className="flex">
         {/* Agent Progress Sidebar */}
         {(agentProgress.isActive || loading) && currentView !== "home" && (
-          <div className="hidden lg:block w-80 bg-white shadow-lg border-r border-gray-200 min-h-screen">
+          <div className="hidden lg:block w-80 bg-gradient-to-br from-slate-900/95 to-indigo-900/90 backdrop-blur-sm border-r border-slate-700/50 min-h-screen shadow-2xl">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Agent Progress
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  🤖 Agent Progress
                 </h3>
                 <button
                   onClick={() =>
                     setAgentProgress((prev) => ({ ...prev, isActive: false }))
                   }
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-slate-400 hover:text-white transition-colors text-lg"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {agentProgress.steps.map((step, index) => (
-                  <div key={index} className="flex items-center space-x-3">
+                  <div key={index} className="flex items-start space-x-4">
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                         index < agentProgress.currentStep
-                          ? "bg-green-500 text-white"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
                           : index === agentProgress.currentStep
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 text-gray-600"
+                          ? "bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-lg animate-pulse"
+                          : "bg-slate-700/60 text-slate-400 border border-slate-600/50"
                       }`}
                     >
                       {index < agentProgress.currentStep ? "✓" : index + 1}
                     </div>
-                    <div
-                      className={`text-sm ${
-                        index <= agentProgress.currentStep
-                          ? "text-gray-900 font-medium"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {step}
+                    <div className="flex-1">
+                      <div
+                        className={`text-sm font-medium transition-colors ${
+                          index <= agentProgress.currentStep
+                            ? "text-white"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        {step}
+                      </div>
                       {index === agentProgress.currentStep && (
-                        <div className="text-xs text-blue-600 mt-1">
+                        <div className="text-xs text-indigo-300 mt-2 leading-relaxed">
                           {step === "Parsing user criteria" &&
                             "Analyzing your founder profile and search preferences"}
                           {step === "Searching grant databases" &&
@@ -579,8 +588,10 @@ function App() {
                 ))}
               </div>
 
-              <div className="mt-6 text-xs text-gray-500">
-                Click "Run Search" to start finding grants
+              <div className="mt-8 p-4 bg-slate-800/40 rounded-xl border border-slate-600/30">
+                <p className="text-xs text-slate-300 text-center">
+                  AI-powered search in progress...
+                </p>
               </div>
             </div>
           </div>
@@ -590,19 +601,19 @@ function App() {
         <div className="flex-1">
           {/* Mobile Progress Indicator */}
           {(agentProgress.isActive || loading) && currentView !== "home" && (
-            <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 p-4">
+            <div className="lg:hidden bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/50 p-4">
               <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-gray-900">
-                    Agent Progress
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-white">
+                    🤖 Agent Progress
                   </h3>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-slate-300">
                     {agentProgress.currentStep + 1}/{agentProgress.steps.length}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-slate-700/60 rounded-full h-3">
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-indigo-500 to-cyan-500 h-3 rounded-full transition-all duration-500 shadow-lg"
                     style={{
                       width: `${
                         ((agentProgress.currentStep + 1) /
@@ -612,7 +623,7 @@ function App() {
                     }}
                   ></div>
                 </div>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-slate-300 mt-2">
                   {agentProgress.steps[agentProgress.currentStep]}
                 </p>
               </div>
@@ -621,88 +632,83 @@ function App() {
 
           {currentView === "home" ? (
             <Home onGetStarted={handleGetStarted} />
-          ) : (
-            <div className="max-w-6xl mx-auto px-4 py-8">
-              {currentView === "search" && (
-                <>
-                  <div className="text-center mb-8">
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                      Find Global Startup Grants
-                    </h1>
-                    <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
-                      Discover funding opportunities tailored to your startup
-                      using AI-powered search. Get personalized grant
-                      recommendations based on your profile and goals.
-                    </p>
-                  </div>
+          ) : currentView === "search" ? (
+            <div>
+              <GrantFinderForm
+                onSubmit={handleFormSubmit}
+                onReset={handleReset}
+                loading={loading}
+              />
 
-                  <GrantFinderForm
-                    onSubmit={handleFormSubmit}
-                    onReset={handleReset}
-                    loading={loading}
-                  />
-
-                  {error && (
-                    <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <span className="text-red-400 text-xl">⚠️</span>
-                        </div>
-                        <div className="ml-3">
-                          <h3 className="text-sm font-medium text-red-800">
-                            Something went wrong
-                          </h3>
-                          <p className="mt-1 text-sm text-red-700">{error}</p>
-                          <div className="mt-4">
-                            <button
-                              onClick={() => setError(null)}
-                              className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-md text-sm font-medium transition-colors"
-                            >
-                              Dismiss
-                            </button>
-                            <button
-                              onClick={handleReset}
-                              className="ml-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors"
-                            >
-                              Try Again
-                            </button>
+              {/* Error and Results Display - with dark theme and centered content */}
+              {(error || loading || grants.length > 0) && (
+                <div className="bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 py-16">
+                  <div className="max-w-[1400px] mx-auto px-6">
+                    {error && (
+                      <div className="mb-8 p-6 bg-gradient-to-br from-red-900/40 to-red-800/30 backdrop-blur-sm border border-red-400/30 rounded-2xl">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0">
+                            <span className="text-red-400 text-2xl">⚠️</span>
+                          </div>
+                          <div className="ml-4">
+                            <h3 className="text-lg font-semibold text-red-200 mb-2">
+                              Something went wrong
+                            </h3>
+                            <p className="text-red-300 mb-4">{error}</p>
+                            <div className="flex gap-3">
+                              <button
+                                onClick={() => setError(null)}
+                                className="bg-red-600/60 hover:bg-red-600/80 text-red-200 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 backdrop-blur-sm"
+                              >
+                                Dismiss
+                              </button>
+                              <button
+                                onClick={handleReset}
+                                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300"
+                              >
+                                Try Again
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {loading && (
-                    <div className="mt-8 text-center">
-                      <div className="inline-flex items-center px-6 py-3 bg-white rounded-lg shadow-md">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
-                        <span className="text-gray-700">
-                          Searching for grants...
-                        </span>
+                    {loading && (
+                      <div className="text-center">
+                        <div className="inline-flex items-center px-8 py-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl shadow-2xl">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mr-4"></div>
+                          <span className="text-white text-lg font-medium">
+                            Searching for grants...
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {grants.length > 0 && (
-                    <div className="mt-8">
-                      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-                        Found {grants.length} Grant
-                        {grants.length !== 1 ? "s" : ""}
-                      </h2>
-                      <GrantCards
-                        grants={grants}
-                        filters={lastFilters}
-                        userProfile={lastFilters}
-                      />
-                    </div>
-                  )}
-                </>
+                    {grants.length > 0 && (
+                      <div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center tracking-tight">
+                          Found {grants.length} Perfect Grant
+                          {grants.length !== 1 ? "s" : ""}{" "}
+                          <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                            For You
+                          </span>
+                        </h2>
+                        <GrantCards
+                          grants={grants}
+                          filters={lastFilters}
+                          userProfile={lastFilters}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
-
+            </div>
+          ) : (
+            <div className="max-w-6xl mx-auto px-4 py-8">
               {currentView === "history" && renderSearchHistory()}
-
               {currentView === "saved" && renderSavedGrants()}
-
               {currentView === "email" && (
                 <div className="bg-white rounded-xl shadow-lg p-8">
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">
