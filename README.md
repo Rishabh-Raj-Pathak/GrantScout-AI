@@ -8,11 +8,29 @@ _An AI agent that automates grant discovery for startup founders through convers
 
 ---
 
-## 🎯 Problem Statement
+Imagine you’re a startup founder with a brilliant idea. You’re excited to build, but there’s one big problem: money. You know there are grants and funding programs out there, but finding them feels like searching for a needle in a haystack.
 
-Grant discovery for startups is fragmented across multiple government portals, private foundations, and accelerator programs. Manual research typically requires 15+ hours to identify relevant opportunities, with many founders missing deadlines or suitable programs due to information scattered across disparate sources.
+And that’s where GrantScout AI comes in.
 
-**Technical Solution**: An AI agent that aggregates funding opportunities from multiple sources, processes natural language queries about funding criteria, and maintains conversational context to refine search results through multi-turn interactions.
+### 🎯The Problem
+Today, if you want to find a grant, you have to dig through endless government websites, private foundations, and accelerator pages. It’s messy. It takes hours. And often, you miss out on opportunities because they’re buried in the noise.
+
+### ⭐The Magic
+GrantScout AI makes this whole process simple.
+Just tell it what you’re looking for, maybe you’re building an AI startup, maybe a climate tech idea, or maybe you’re a student with an innovation project. GrantScout listens, understands, and instantly brings back the most relevant funding opportunities.
+
+No spreadsheets. No endless tabs. Just answers.
+
+How It Feels
+It’s like having a personal scout, one that never sleeps, never gets tired, and knows exactly where to look. It gathers grants from all over the world, organizes them neatly, and shows you the ones that actually matter for you.
+
+### 🩵The Experience
+The interface is clean, fast, and human. You can type in your query like you’re talking to a friend. GrantScout will even ask you clarifying questions, so it understands exactly what you need.
+
+And when it finds the right matches, it doesn’t just dump data. It presents clear, simple cards with deadlines, eligibility, and funding amounts. So you know instantly if it’s worth applying.
+
+### 🚀The Impact
+With GrantScout AI, what used to take days of manual research now takes minutes. Founders save time, discover hidden opportunities, and focus on what really matters : building their ideas.
 
 ---
 
