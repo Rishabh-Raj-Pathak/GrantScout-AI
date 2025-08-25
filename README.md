@@ -2,8 +2,6 @@
 
 **AgentHack 2025 Submission**
 
-_An AI agent that automates grant discovery for startup founders through conversational interactions using Portia's agentic framework._
-
 [![Demo Video](https://img.shields.io/badge/🎬_Watch-Demo_Video-red?style=for-the-badge)](./assets/demo-video.mp4)
 
 ---
