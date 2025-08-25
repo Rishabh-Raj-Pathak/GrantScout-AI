@@ -2,7 +2,7 @@
 
 **AgentHack 2025 Submission**
 
-[![Demo Video](https://img.shields.io/badge/🎬_Watch-Demo_Video-red?style=for-the-badge)](https://youtu.be/ZdXxpE77gUc?si=0Af5AZf35u0WSkyP)
+[![Project Video](https://img.shields.io/badge/🎬_Click_Here_to_Watch-Project_Video-red?style=for-the-badge)](https://youtu.be/ZdXxpE77gUc?si=0Af5AZf35u0WSkyP)
 
 ---
 
