@@ -62,7 +62,6 @@ Based on the [Portia Tools Catalogue](https://docs.portialabs.ai/portia-tools), 
   "framework": "React 19",
   "bundler": "Vite",
   "styling": "Tailwind CSS",
-  "components": "shadcn/ui",
   "http_client": "Axios",
   "state_management": "localStorage"
 }
