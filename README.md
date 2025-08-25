@@ -88,7 +88,7 @@ Based on the [Portia Tools Catalogue](https://docs.portialabs.ai/portia-tools), 
 PORTIA_API_KEY=          # Portia cloud tools access
 OPENAI_API_KEY=          # LLM inference (GPT-4o-mini)
 TAVILY_API_KEY=          # Web search via Tavily
-SCRAPER_API_KEY=         # Proxy rotation and JS rendering
+SCRAPER_API_KEY=         # anti bot evasion scrapping
 SENDER_EMAIL=            # Gmail SMTP configuration
 EMAIL_PASSWORD=          # Gmail app password
 ```
