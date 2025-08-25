@@ -186,11 +186,7 @@ EMAIL_PASSWORD=your_app_password
 
 ---
 
-## 🎬 Demo Video
-
-**[📹 Complete demo walkthrough](./assets/demo-video.mp4)**
-
-Demonstrates:
+## Demonstrates:
 
 1. Form-based grant search with filtering
 2. Natural language query processing
