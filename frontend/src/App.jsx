@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Home from "./components/Home";
 import GrantFinderForm from "./components/GrantFinderForm";
 import GrantCards from "./components/GrantCards";
 import ClarificationModal from "./components/ClarificationModal";
+import InterstitialQuestions from "./components/InterstitialQuestions";
 import "./App.css";
 
 function App() {
@@ -26,6 +27,10 @@ function App() {
   const [clarification, setClarification] = useState(null);
   const [originalQuery, setOriginalQuery] = useState(null);
   const [clarificationLoading, setClarificationLoading] = useState(false);
+  const [interstitialAnswers, setInterstitialAnswers] = useState({});
+  const [showInterstitialQuestions, setShowInterstitialQuestions] =
+    useState(false);
+  const [emailDigestSent, setEmailDigestSent] = useState(false);
 
   const handleFormSubmit = async (formData) => {
     setLoading(true);
@@ -33,6 +38,9 @@ function App() {
     setClarification(null);
     setOriginalQuery(formData);
     setAgentProgress((prev) => ({ ...prev, isActive: true, currentStep: 0 }));
+    setShowInterstitialQuestions(true);
+    setInterstitialAnswers({});
+    setEmailDigestSent(false);
 
     // Use real agent steps from backend
     const agentSteps = [
@@ -97,6 +105,13 @@ function App() {
           "searchHistory",
           JSON.stringify(searchHistory.slice(0, 10))
         );
+
+        // Auto-send email digest for first successful render
+        if (data.grants && data.grants.length > 0) {
+          setTimeout(() => {
+            sendAutoEmailDigest(data.grants, formData);
+          }, 1000);
+        }
       }
     } catch (err) {
       console.error("Grant search failed:", err);
@@ -109,6 +124,7 @@ function App() {
       clearInterval(progressInterval);
     } finally {
       setLoading(false);
+      setShowInterstitialQuestions(false);
       setTimeout(() => {
         setAgentProgress((prev) => ({ ...prev, isActive: false }));
       }, 1000);
@@ -155,6 +171,13 @@ function App() {
         "searchHistory",
         JSON.stringify(searchHistory.slice(0, 10))
       );
+
+      // Auto-send email digest for clarification results
+      if (data.grants && data.grants.length > 0) {
+        setTimeout(() => {
+          sendAutoEmailDigest(data.grants, originalQuery);
+        }, 1000);
+      }
     } catch (err) {
       console.error("Clarification failed:", err);
       const friendlyError = err.message.includes("fetch")
@@ -169,6 +192,51 @@ function App() {
   const handleClarificationCancel = () => {
     setClarification(null);
     setClarificationLoading(false);
+  };
+
+  const handleInterstitialAnswer = (questionId, answer) => {
+    setInterstitialAnswers((prev) => ({
+      ...prev,
+      [questionId]: answer,
+    }));
+  };
+
+  const sendAutoEmailDigest = async (grants, filters) => {
+    if (emailDigestSent || !grants || grants.length === 0) {
+      return;
+    }
+
+    // Prevent multiple sends immediately
+    setEmailDigestSent(true);
+
+    try {
+      // Get email from environment or use fallback
+      const recipientEmail =
+        process.env.REACT_APP_DEFAULT_EMAIL || "rishabhrajpathak06@gmail.com";
+
+      const response = await fetch("http://localhost:5000/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: recipientEmail,
+          grants: grants,
+          filters: filters,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("📧 Email digest sent automatically");
+      } else {
+        // Reset flag if send failed
+        setEmailDigestSent(false);
+      }
+    } catch (error) {
+      console.error("Failed to send auto email digest:", error);
+      // Reset flag if send failed
+      setEmailDigestSent(false);
+    }
   };
 
   const handleGetStarted = () => {
@@ -698,6 +766,7 @@ function App() {
                           grants={grants}
                           filters={lastFilters}
                           userProfile={lastFilters}
+                          interstitialAnswers={interstitialAnswers}
                         />
                       </div>
                     )}
@@ -736,6 +805,13 @@ function App() {
           onChoose={handleClarificationChoice}
           onCancel={handleClarificationCancel}
           loading={clarificationLoading}
+        />
+
+        {/* Interstitial Questions */}
+        <InterstitialQuestions
+          isVisible={showInterstitialQuestions && loading}
+          onAnswer={handleInterstitialAnswer}
+          answers={interstitialAnswers}
         />
       </div>
     </div>

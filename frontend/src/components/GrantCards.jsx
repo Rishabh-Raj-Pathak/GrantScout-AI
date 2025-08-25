@@ -357,7 +357,12 @@ const GrantCard = ({ grant, userProfile }) => {
   );
 };
 
-const GrantCards = ({ grants, filters, userProfile }) => {
+const GrantCards = ({
+  grants,
+  filters,
+  userProfile,
+  interstitialAnswers = {},
+}) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -497,6 +502,37 @@ const GrantCards = ({ grants, filters, userProfile }) => {
               Powered by AI + Web Exploration
             </span>
           </div>
+
+          {/* Agent Preferences */}
+          {Object.keys(interstitialAnswers).length > 0 && (
+            <div className="mb-4 p-3 bg-white bg-opacity-40 rounded-lg border border-indigo-200">
+              <div className="flex items-center mb-2">
+                <span className="text-sm font-medium text-gray-700 mr-2">
+                  🤖 Agent understood your preferences:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(interstitialAnswers).map(([key, value]) => {
+                  const getIcon = (k) => {
+                    if (k === "preference") return "🏛️";
+                    if (k === "deadline") return "⏰";
+                    if (k === "eligibility") return "🏢";
+                    return "✓";
+                  };
+
+                  return (
+                    <span
+                      key={key}
+                      className="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full border border-indigo-200"
+                    >
+                      <span className="mr-1">{getIcon(key)}</span>
+                      {value}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="text-center p-3 bg-white bg-opacity-60 rounded-lg">
