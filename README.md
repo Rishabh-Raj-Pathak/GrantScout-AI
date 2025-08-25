@@ -270,7 +270,7 @@ Better support for composing multiple tools in complex workflows, particularly f
 
 MIT License - Open source for the startup community.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Portia Labs**: For providing the agentic framework
 - **Open Source Community**: React, Flask, and supporting libraries
